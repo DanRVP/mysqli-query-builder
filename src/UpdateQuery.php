@@ -8,6 +8,20 @@ use QueryBuilder\Condition\ConditionFactory;
 class UpdateQuery extends AbstractQuery
 {
     /**
+     * Error message for missing fields
+     *
+     * @var string
+     */
+    private const MISSING_FIELD_ERROR = 'You cannot create an update statement without fields and values to update';
+
+    /**
+     * Update keys
+     *
+     * @var array
+     */
+    protected array $fields = [];
+
+    /**
      * Update values
      *
      * @var array
@@ -29,16 +43,38 @@ class UpdateQuery extends AbstractQuery
     protected ?int $limit = null;
 
     /**
+     * Constructor
+     *
+     * @param string $table Table name
+     * @param array $values Associative array of values to update
+     * @throws Exception
+     */
+    public function __construct(protected string $table, array $values)
+    {
+        if (empty($values)) {
+            throw new Exception(self::MISSING_FIELD_ERROR);
+        }
+
+        $this->values($values, true);
+    }
+
+    /**
      * @inheritDoc
      * @throws Exception
      */
     public function sql(): string
     {
-        if (empty($fields) || empty($values)) {
-            throw new Exception('You cannot create an update statement without fields and values to update');
+        if (empty($this->fields) || empty($this->values)) {
+            // Somehow managed to null out value. Throw error
+            throw new Exception(self::MISSING_FIELD_ERROR);
         }
 
-        $query_string = "UPDATE $this->table ";
+        $query_string = "UPDATE $this->table SET ";
+        foreach ($this->fields as $field) {
+            $query_string .= "$field = ?, ";
+        }
+
+        $query_string = trim($query_string, ', ');
         if (!empty($this->conditions)) {
             $query_string .= ' ' . ConditionFactory::createWhere($this->conditions);
         }
@@ -64,7 +100,7 @@ class UpdateQuery extends AbstractQuery
             }
         }
 
-        return $conditions;
+        return array_merge($this->values, $conditions);
     }
 
     /**
@@ -76,11 +112,11 @@ class UpdateQuery extends AbstractQuery
      */
     public function values(array $values, bool $override = false): self
     {
-        if ($override) {
-            $this->values = $values;
-        } else {
-            $this->values = array_merge($this->values, $values);
-        }
+        $keys = array_keys($values);
+        $values = array_values($values);
+
+        $this->assign('values', $values, $override);
+        $this->assign('fields', $keys, $override);
 
         return $this;
     }
@@ -94,13 +130,7 @@ class UpdateQuery extends AbstractQuery
      */
     public function where(array $conditions, bool $override = false): self
     {
-        if ($override) {
-            $this->conditions = $conditions;
-        } else {
-            $this->conditions = array_merge($this->conditions, $conditions);
-        }
-
-        return $this;
+        return $this->assign('conditions', $conditions, $override);
     }
 
     /**

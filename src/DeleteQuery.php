@@ -52,12 +52,6 @@ class DeleteQuery extends AbstractQuery
      */
     public function where(array $conditions, bool $override = false): self
     {
-        if ($override) {
-            $this->conditions = $conditions;
-        } else {
-            $this->conditions = array_merge($this->conditions, $conditions);
-        }
-
-        return $this;
+        return $this->assign('conditions', $conditions, $override);
     }
 }

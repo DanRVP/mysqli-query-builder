@@ -112,7 +112,7 @@ class SelectQuery extends AbstractQuery
     }
 
     /**
-     * Set the fields to be selectec
+     * Set the fields to be selected
      *
     * @param array $fields List of fields to select
      * @param bool $override Set to true to assign the fields in stead of merging them
@@ -120,13 +120,7 @@ class SelectQuery extends AbstractQuery
      */
     public function fields(array $fields, bool $override = false): self
     {
-        if ($override) {
-            $this->fields = $fields;
-        } else {
-            $this->fields = array_merge($this->fields, $fields);
-        }
-
-        return $this;
+        return $this->assign('fields', $fields, $override);
     }
 
     /**
@@ -138,13 +132,7 @@ class SelectQuery extends AbstractQuery
      */
     public function where(array $conditions, bool $override = false): self
     {
-        if ($override) {
-            $this->conditions = $conditions;
-        } else {
-            $this->conditions = array_merge($this->conditions, $conditions);
-        }
-
-        return $this;
+        return $this->assign('conditions', $conditions, $override);
     }
 
     /**
@@ -184,13 +172,7 @@ class SelectQuery extends AbstractQuery
             $group_by = [$group_by];
         }
 
-        if ($override) {
-            $this->group_by = $group_by;
-        } else {
-            $this->group_by = array_merge($this->group_by, $group_by);
-        }
-
-        return $this;
+        return $this->assign('group_by', $group_by, $override);
     }
 
     /**
@@ -207,13 +189,7 @@ class SelectQuery extends AbstractQuery
             $order_by = [$order_by];
         }
 
-        if ($override) {
-            $this->order_by = $order_by;
-        } else {
-            $this->order_by = array_merge($this->order_by, $order_by);
-        }
-
         $this->order_direction = $direction->value;
-        return $this;
+        return $this->assign('order_by', $order_by, $override);
     }
 }

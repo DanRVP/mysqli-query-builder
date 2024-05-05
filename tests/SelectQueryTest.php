@@ -9,7 +9,7 @@ use QueryBuilder\SelectQuery;
 
 class SelectQueryTest extends TestCase
 {
-/**
+    /**
      * Tests sanitising channel names from API.
      *
      * @param SelectQuery $query Query

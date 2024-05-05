@@ -8,7 +8,7 @@ use QueryBuilder\DeleteQuery;
 
 class DeleteQueryTest extends TestCase
 {
-/**
+    /**
      * Tests sanitising channel names from API.
      *
      * @param DeleteQuery $query Query
