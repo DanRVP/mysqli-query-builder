@@ -4,6 +4,7 @@ namespace QueryBuilderTests;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use QueryBuilder\Enum\Direction;
 use QueryBuilder\SelectQuery;
 use Reflection;
 
@@ -78,6 +79,11 @@ class SelectQueryTest extends TestCase
             'expected' => 'SELECT * FROM test GROUP BY ?, ?',
         ];
 
+        $order_single = [
+            'query' => (new SelectQuery('test'))->orderBy('name', Direction::Descending),
+            'expected' => 'SELECT * FROM test ORDER BY ? DESC',
+        ];
+
         $complex = [
             'query' => (new SelectQuery('test'))
                 ->fields(['id', 'name'])
@@ -103,6 +109,7 @@ class SelectQueryTest extends TestCase
             'group_single',
             'group_multiple',
             'complex',
+            'order_single',
         );
     }
 }

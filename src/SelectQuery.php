@@ -3,6 +3,7 @@
 namespace QueryBuilder;
 
 use QueryBuilder\Condition\ConditionFactory;
+use QueryBuilder\Enum\Direction;
 
 class SelectQuery extends AbstractQuery
 {
@@ -74,6 +75,10 @@ class SelectQuery extends AbstractQuery
             $query_string .= ' GROUP BY ' . implode(', ', array_pad([], count($this->group_by), '?'));
         }
 
+        if (!empty($this->order_by)) {
+            $query_string .= ' ORDER BY ' . implode(', ', array_pad([], count($this->order_by), '?')) . ' ' . $this->order_direction;
+        }
+
         if (!empty($this->limit)) {
             $query_string .= ' ' . ConditionFactory::createLimit($this->limit);
         }
@@ -92,10 +97,18 @@ class SelectQuery extends AbstractQuery
     {
         return array_merge(
             array_values($this->conditions),
-            array_values($this->group_by)
+            array_values($this->group_by),
+            array_values($this->order_by)
         );
     }
 
+    /**
+     * Set the fields to be selectec
+     *
+    * @param array $fields List of fields to select
+     * @param bool $override Set to true to assign the fields in stead of merging them
+     * @return self
+     */
     public function fields(array $fields, bool $override = false): self
     {
         if ($override) {
@@ -107,6 +120,13 @@ class SelectQuery extends AbstractQuery
         return $this;
     }
 
+    /**
+     * Set the where conditions
+     *
+     * @param array $conditions List of conditions to filter the query by
+     * @param bool $override Set to true to assign the conditions in stead of merging them
+     * @return self
+     */
     public function where(array $conditions, bool $override = false): self
     {
         if ($override) {
@@ -118,18 +138,37 @@ class SelectQuery extends AbstractQuery
         return $this;
     }
 
+    /**
+     * Limit the number of records returned
+     *
+     * @param int $limit The limit to assign
+     * @return self
+     */
     public function limit(int $limit): self
     {
         $this->limit = $limit;
         return $this;
     }
 
+    /**
+     * Set the offset for the query
+     *
+     * @param int $offset The offset to assign
+     * @return self
+     */
     public function offset(int $offset): self
     {
         $this->offset = $offset;
         return $this;
     }
 
+    /**
+     * Set the fields to group by
+     *
+     * @param array|string $group_by Single or multiple fields to group
+     * @param bool $override Set to true to assign the fields in stead of merging them
+     * @return self
+     */
     public function groupBy(array|string $group_by, bool $override = false): self
     {
         if (is_string($group_by)) {
@@ -142,6 +181,30 @@ class SelectQuery extends AbstractQuery
             $this->group_by = array_merge($this->group_by, $group_by);
         }
 
+        return $this;
+    }
+
+    /**
+     * Set ordering.
+     *
+     * @param array|string $order_by Field or fields to order by
+     * @param Direction $direction ASC or DESC Will always be overidden
+     * @param bool $overrride Whether to merge or replace the ordering fields
+     * @return self
+     */
+    public function orderBy(array|string $order_by, Direction $direction, bool $override = false): self
+    {
+        if (is_string($order_by)) {
+            $order_by = [$order_by];
+        }
+
+        if ($override) {
+            $this->order_by = $order_by;
+        } else {
+            $this->order_by = array_merge($this->order_by, $order_by);
+        }
+
+        $this->order_direction = $direction->value;
         return $this;
     }
 }
