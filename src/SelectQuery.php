@@ -95,8 +95,17 @@ class SelectQuery extends AbstractQuery
      */
     public function params(): array
     {
+        $conditions = [];
+        foreach ($this->conditions as $condition) {
+            if (is_array($condition)) {
+                $conditions = array_merge($conditions, array_values($condition));
+            } else {
+                $conditions[] = $condition;
+            }
+        }
+
         return array_merge(
-            array_values($this->conditions),
+            $conditions,
             array_values($this->group_by),
             array_values($this->order_by)
         );

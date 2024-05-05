@@ -21,7 +21,6 @@ abstract class AbstractQuery
      */
     abstract public function params(): array;
 
-
     /**
      * Constructor
      *
