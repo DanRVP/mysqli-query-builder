@@ -116,6 +116,33 @@ class SelectQueryTest extends TestCase
             'expected_data' => [1, 2, 3, 4, 5, '%og%', 'name'],
         ];
 
+        $or = [
+            'query' => (new SelectQuery('test'))
+                ->fields(['id', 'name'])
+                ->where([
+                    'OR' => [
+                        'id' => 1,
+                        'name' => 'dan',
+                    ],
+                ]),
+            'expected_sql' => 'SELECT id, name FROM test WHERE (id = ? OR name = ?)',
+            'expected_data' => [1, 'dan'],
+        ];
+
+        $and_or = [
+            'query' => (new SelectQuery('test'))
+                ->fields(['id', 'name'])
+                ->where([
+                    'surname' => 'rogers',
+                    'OR' => [
+                        'id' => 1,
+                        'name' => 'dan',
+                    ],
+                ]),
+            'expected_sql' => 'SELECT id, name FROM test WHERE surname = ? AND (id = ? OR name = ?)',
+            'expected_data' => ['rogers', 1, 'dan'],
+        ];
+
         return compact(
             'simple',
             'fields_only',
@@ -130,6 +157,8 @@ class SelectQueryTest extends TestCase
             'complex',
             'order_single',
             'order_multiple',
+            'or',
+            'and_or',
         );
     }
 }
