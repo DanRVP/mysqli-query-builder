@@ -72,11 +72,11 @@ class SelectQuery extends AbstractQuery
         }
 
         if (!empty($this->group_by)) {
-            $query_string .= ' GROUP BY ' . implode(', ', array_pad([], count($this->group_by), '?'));
+            $query_string .= ' GROUP BY ' . implode(', ', $this->group_by);
         }
 
         if (!empty($this->order_by)) {
-            $query_string .= ' ORDER BY ' . implode(', ', array_pad([], count($this->order_by), '?')) . ' ' . $this->order_direction;
+            $query_string .= ' ORDER BY ' . implode(', ', $this->order_by) . ' ' . $this->order_direction;
         }
 
         if (!empty($this->limit)) {
@@ -104,11 +104,7 @@ class SelectQuery extends AbstractQuery
             }
         }
 
-        return array_merge(
-            $conditions,
-            array_values($this->group_by),
-            array_values($this->order_by)
-        );
+        return array_merge($conditions);
     }
 
     /**

@@ -80,26 +80,26 @@ class SelectQueryTest extends TestCase
 
         $group_single = [
             'query' => (new SelectQuery('test'))->groupBy('name'),
-            'expected_sql' => 'SELECT * FROM test GROUP BY ?',
-            'expected_data' => ['name'],
+            'expected_sql' => 'SELECT * FROM test GROUP BY name',
+            'expected_data' => [],
         ];
 
         $group_multiple = [
             'query' => (new SelectQuery('test'))->groupBy(['firstname', 'surname']),
-            'expected_sql' => 'SELECT * FROM test GROUP BY ?, ?',
-            'expected_data' => ['firstname', 'surname'],
+            'expected_sql' => 'SELECT * FROM test GROUP BY firstname, surname',
+            'expected_data' => [],
         ];
 
         $order_single = [
             'query' => (new SelectQuery('test'))->orderBy('name', Direction::Descending),
-            'expected_sql' => 'SELECT * FROM test ORDER BY ? DESC',
-            'expected_data' => ['name'],
+            'expected_sql' => 'SELECT * FROM test ORDER BY name DESC',
+            'expected_data' => [],
         ];
 
         $order_multiple = [
             'query' => (new SelectQuery('test'))->orderBy(['name', 'surname'], Direction::Ascending),
-            'expected_sql' => 'SELECT * FROM test ORDER BY ?, ? ASC',
-            'expected_data' => ['name', 'surname'],
+            'expected_sql' => 'SELECT * FROM test ORDER BY name, surname ASC',
+            'expected_data' => [],
         ];
 
         $complex = [
@@ -112,8 +112,8 @@ class SelectQueryTest extends TestCase
                 ->limit(25)
                 ->offset(25)
                 ->groupBy('name'),
-            'expected_sql' => 'SELECT id, name FROM test WHERE id IN (?, ?, ?, ?, ?) AND name LIKE ? GROUP BY ? LIMIT 25 OFFSET 25',
-            'expected_data' => [1, 2, 3, 4, 5, '%og%', 'name'],
+            'expected_sql' => 'SELECT id, name FROM test WHERE id IN (?, ?, ?, ?, ?) AND name LIKE ? GROUP BY name LIMIT 25 OFFSET 25',
+            'expected_data' => [1, 2, 3, 4, 5, '%og%'],
         ];
 
         $or = [
