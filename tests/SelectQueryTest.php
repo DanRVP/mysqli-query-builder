@@ -1,10 +1,13 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace QueryBuilderTests;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use QueryBuilder\Enum\Direction;
+use QueryBuilder\Enum\Join;
 use QueryBuilder\SelectQuery;
 
 class SelectQueryTest extends TestCase
@@ -143,6 +146,15 @@ class SelectQueryTest extends TestCase
             'expected_data' => ['rogers', 1, 'dan'],
         ];
 
+        $with_join = [
+            'query' => (new SelectQuery('t1'))
+                ->join(Join::Inner, 't2', [
+                    't1.id' => 't2.t1_id',
+                ]),
+            'expected_sql' => 'SELECT * FROM t1 INNER JOIN t2 ON (t1.id = t2.t1_id)',
+            'expected_data' => [],
+        ];
+
         return compact(
             'simple',
             'fields_only',
@@ -159,6 +171,7 @@ class SelectQueryTest extends TestCase
             'order_multiple',
             'or',
             'and_or',
+            'with_join',
         );
     }
 }

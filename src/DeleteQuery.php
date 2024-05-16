@@ -1,17 +1,20 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace QueryBuilder;
 
-use QueryBuilder\Condition\ConditionFactory;
+use QueryBuilder\Trait\JoinTrait;
+use QueryBuilder\Trait\LimitTrait;
+use QueryBuilder\Trait\OrderByTrait;
+use QueryBuilder\Trait\WhereTrait;
 
 class DeleteQuery extends AbstractQuery
 {
-    /**
-     * Where conditions
-     *
-     * @var array
-     */
-    protected array $conditions = [];
+    use JoinTrait;
+    use LimitTrait;
+    use OrderByTrait;
+    use WhereTrait;
 
     /**
      * @inheritDoc
@@ -19,8 +22,20 @@ class DeleteQuery extends AbstractQuery
     public function sql(): string
     {
         $query_string = "DELETE FROM $this->table";
+        if (!empty($this->joins)) {
+            $query_string .= ' ' . $this->joinSql($this->joins);
+        }
+
         if (!empty($this->conditions)) {
-            $query_string .= ' ' . ConditionFactory::createWhere($this->conditions);
+            $query_string .= ' ' . $this->whereSql($this->conditions);
+        }
+
+        if (!empty($this->order_by)) {
+            $query_string .= ' ' . $this->orderBySql();
+        }
+
+        if (!empty($this->limit)) {
+            $query_string .= ' ' . $this->limitSql($this->limit);
         }
 
         return $query_string;
@@ -41,17 +56,5 @@ class DeleteQuery extends AbstractQuery
         }
 
         return $conditions;
-    }
-
-    /**
-     * Set the where conditions
-     *
-     * @param array $conditions List of conditions to filter the query by
-     * @param bool $override Set to true to assign the conditions in stead of merging them
-     * @return self
-     */
-    public function where(array $conditions, bool $override = false): self
-    {
-        return $this->assign('conditions', $conditions, $override);
     }
 }

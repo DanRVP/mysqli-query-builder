@@ -1,12 +1,21 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace QueryBuilder;
 
-use QueryBuilder\Condition\ConditionFactory;
-use QueryBuilder\Enum\Direction;
+use QueryBuilder\Trait\JoinTrait;
+use QueryBuilder\Trait\LimitTrait;
+use QueryBuilder\Trait\OrderByTrait;
+use QueryBuilder\Trait\WhereTrait;
 
 class SelectQuery extends AbstractQuery
 {
+    use JoinTrait;
+    use LimitTrait;
+    use OrderByTrait;
+    use WhereTrait;
+
     /**
      * Select fields
      *
@@ -15,39 +24,11 @@ class SelectQuery extends AbstractQuery
     protected array $fields = [];
 
     /**
-     * Where conditions
-     *
-     * @var array
-     */
-    protected array $conditions = [];
-
-    /**
-     * Query limit
-     *
-     * @var int|null
-     */
-    protected ?int $limit = null;
-
-    /**
      * Query offset
      *
      * @var int|null
      */
     protected ?int $offset = null;
-
-    /**
-     * Order direction `ASC` or `DESC`
-     *
-     * @var string
-     */
-    protected string $order_direction;
-
-    /**
-     * Fields to order by
-     *
-     * @var array
-     */
-    protected array $order_by = [];
 
     /**
      * Fields to group by
@@ -67,8 +48,12 @@ class SelectQuery extends AbstractQuery
         }
 
         $query_string = "SELECT $select FROM $this->table";
+        if (!empty($this->joins)) {
+            $query_string .= ' ' . $this->joinSql($this->joins);
+        }
+
         if (!empty($this->conditions)) {
-            $query_string .= ' ' . ConditionFactory::createWhere($this->conditions);
+            $query_string .= ' ' . $this->whereSql($this->conditions);
         }
 
         if (!empty($this->group_by)) {
@@ -76,11 +61,11 @@ class SelectQuery extends AbstractQuery
         }
 
         if (!empty($this->order_by)) {
-            $query_string .= ' ORDER BY ' . implode(', ', $this->order_by) . ' ' . $this->order_direction;
+            $query_string .= ' ' . $this->orderBySql();
         }
 
         if (!empty($this->limit)) {
-            $query_string .= ' ' . ConditionFactory::createLimit($this->limit);
+            $query_string .= ' ' . $this->limitSql($this->limit);
         }
 
         if (!is_null($this->offset)) {
@@ -120,30 +105,6 @@ class SelectQuery extends AbstractQuery
     }
 
     /**
-     * Set the where conditions
-     *
-     * @param array $conditions List of conditions to filter the query by
-     * @param bool $override Set to true to assign the conditions in stead of merging them
-     * @return self
-     */
-    public function where(array $conditions, bool $override = false): self
-    {
-        return $this->assign('conditions', $conditions, $override);
-    }
-
-    /**
-     * Limit the number of records returned
-     *
-     * @param int $limit The limit to assign
-     * @return self
-     */
-    public function limit(int $limit): self
-    {
-        $this->limit = $limit;
-        return $this;
-    }
-
-    /**
      * Set the offset for the query
      *
      * @param int $offset The offset to assign
@@ -169,23 +130,5 @@ class SelectQuery extends AbstractQuery
         }
 
         return $this->assign('group_by', $group_by, $override);
-    }
-
-    /**
-     * Set ordering.
-     *
-     * @param array|string $order_by Field or fields to order by
-     * @param Direction $direction ASC or DESC Will always be overidden
-     * @param bool $overrride Whether to merge or replace the ordering fields
-     * @return self
-     */
-    public function orderBy(array|string $order_by, Direction $direction, bool $override = false): self
-    {
-        if (is_string($order_by)) {
-            $order_by = [$order_by];
-        }
-
-        $this->order_direction = $direction->value;
-        return $this->assign('order_by', $order_by, $override);
     }
 }

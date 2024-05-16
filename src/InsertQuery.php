@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace QueryBuilder;
 
@@ -27,20 +29,6 @@ class InsertQuery extends AbstractQuery
      * @var array
      */
     protected array $values = [];
-
-    /**
-     * Where conditions
-     *
-     * @var array
-     */
-    protected array $conditions = [];
-
-    /**
-     * Query limit
-     *
-     * @var int|null
-     */
-    protected ?int $limit = null;
 
     /**
      * Constructor

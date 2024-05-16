@@ -1,12 +1,20 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace QueryBuilder;
 
 use Exception;
-use QueryBuilder\Condition\ConditionFactory;
+use QueryBuilder\Trait\JoinTrait;
+use QueryBuilder\Trait\LimitTrait;
+use QueryBuilder\Trait\WhereTrait;
 
 class UpdateQuery extends AbstractQuery
 {
+    use JoinTrait;
+    use LimitTrait;
+    use WhereTrait;
+
     /**
      * Error message for missing fields
      *
@@ -36,13 +44,6 @@ class UpdateQuery extends AbstractQuery
     protected array $conditions = [];
 
     /**
-     * Query limit
-     *
-     * @var int|null
-     */
-    protected ?int $limit = null;
-
-    /**
      * Constructor
      *
      * @param string $table Table name
@@ -69,18 +70,23 @@ class UpdateQuery extends AbstractQuery
             throw new Exception(self::MISSING_FIELD_ERROR);
         }
 
-        $query_string = "UPDATE $this->table SET ";
+        $query_string = "UPDATE $this->table";
+        if (!empty($this->joins)) {
+            $query_string .= ' ' . $this->joinSql($this->joins);
+        }
+
+        $query_string .= " SET ";
         foreach ($this->fields as $field) {
             $query_string .= "$field = ?, ";
         }
 
         $query_string = trim($query_string, ', ');
         if (!empty($this->conditions)) {
-            $query_string .= ' ' . ConditionFactory::createWhere($this->conditions);
+            $query_string .= ' ' . $this->whereSql($this->conditions);
         }
 
         if (!empty($this->limit)) {
-            $query_string .= ' ' . ConditionFactory::createLimit($this->limit);
+            $query_string .= ' ' . $this->limitSql($this->limit);
         }
 
         return $query_string;
@@ -118,30 +124,6 @@ class UpdateQuery extends AbstractQuery
         $this->assign('values', $values, $override);
         $this->assign('fields', $keys, $override);
 
-        return $this;
-    }
-
-    /**
-     * Set the where conditions
-     *
-     * @param array $conditions List of conditions to filter the query by
-     * @param bool $override Set to true to assign the conditions in stead of merging them
-     * @return self
-     */
-    public function where(array $conditions, bool $override = false): self
-    {
-        return $this->assign('conditions', $conditions, $override);
-    }
-
-    /**
-     * Limit the number of records returned
-     *
-     * @param int $limit The limit to assign
-     * @return self
-     */
-    public function limit(int $limit): self
-    {
-        $this->limit = $limit;
         return $this;
     }
 }
