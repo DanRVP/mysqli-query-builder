@@ -155,6 +155,18 @@ class SelectQueryTest extends TestCase
             'expected_data' => [],
         ];
 
+        $multijoin = [
+            'query' => (new SelectQuery('t1'))
+                ->join(Join::Inner, 't2', [
+                    't1.id' => 't2.t1_id',
+                ])
+                ->join(Join::Inner, 't3', [
+                    't3.id' => 't2.t1_id',
+                ]),
+            'expected_sql' => 'SELECT * FROM t1 INNER JOIN t2 ON (t1.id = t2.t1_id) INNER JOIN t3 ON (t3.id = t2.t1_id)',
+            'expected_data' => [],
+        ];
+
         return compact(
             'simple',
             'fields_only',
@@ -172,6 +184,7 @@ class SelectQueryTest extends TestCase
             'or',
             'and_or',
             'with_join',
+            'multijoin',
         );
     }
 }

@@ -38,10 +38,10 @@ trait JoinTrait
     {
         $join_string = '';
         foreach ($this->joins as $join) {
-            $join_string .= $this->createJoinString(...$join) . ", ";
+            $join_string .= $this->createJoinString(...$join) . ' ';
         }
 
-        return trim($join_string, ', ');
+        return trim($join_string, ' ');
     }
 
     /**
