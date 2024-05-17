@@ -61,8 +61,8 @@ trait WhereTrait
     {
         if (is_array($value)) {
             return "$key IN (" . implode(', ', array_pad([], count($value), '?')) . ")";
-        } elseif (str_contains($key, 'LIKE')) {
-            return "$key ?";
+        } elseif (count($parts = explode(' ', $key, 2)) === 2) {
+            return "$parts[0] $parts[1] ?";
         } else {
             return "$key = ?";
         }

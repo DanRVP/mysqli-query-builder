@@ -167,6 +167,24 @@ class SelectQueryTest extends TestCase
             'expected_data' => [],
         ];
 
+        $greater_than = [
+            'query' => (new SelectQuery('test'))
+                ->where([
+                    'id >' => 25,
+                ]),
+            'expected_sql' => 'SELECT * FROM test WHERE id > ?',
+            'expected_data' => [25],
+        ];
+
+        $less_than = [
+            'query' => (new SelectQuery('test'))
+                ->where([
+                    'id <' => 25,
+                ]),
+            'expected_sql' => 'SELECT * FROM test WHERE id < ?',
+            'expected_data' => [25],
+        ];
+
         return compact(
             'simple',
             'fields_only',
@@ -185,6 +203,7 @@ class SelectQueryTest extends TestCase
             'and_or',
             'with_join',
             'multijoin',
+            'greater_than',
         );
     }
 }
